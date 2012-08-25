@@ -235,4 +235,3 @@ int FlashDevUnmount()
 
 	return J4FS_SUCCESS;
 }
-
