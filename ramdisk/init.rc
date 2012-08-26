@@ -93,7 +93,7 @@ setrlimit 4 -1 -1
     write /proc/sys/kernel/hung_task_timeout_secs 0
     write /proc/cpu/alignment 4
     write /proc/sys/kernel/sched_latency_ns 10000000
-#   write /proc/sys/kernel/sched_wakeup_granularity_ns 2000000
+#    write /proc/sys/kernel/sched_wakeup_granularity_ns 2000000
     write /proc/sys/kernel/sched_compat_yield 1
     write /proc/sys/kernel/sched_child_runs_first 0
     write /proc/sys/kernel/sched_rt_period_us 10000000
@@ -138,7 +138,7 @@ on fs
 
     mount ext4 /dev/block/mmcblk0p2 /modemfs nosuid nodev
 ## for ODE
-#   mount ext4 /dev/block/mmcblk0p5 /data nosuid nodev nodelalloc,noauto_da_alloc
+#    mount ext4 /dev/block/mmcblk0p5 /data nosuid nodev nodelalloc,noauto_da_alloc
     mount ext4 /dev/block/mmcblk0p4 /cache nosuid nodev
     mount ext4 /dev/block/mmcblk0p7 /efs nosuid nodev noatime
 
@@ -157,7 +157,7 @@ on fs
 
 on post-fs
     # once everything is setup, no need to modify /
-#   mount rootfs rootfs / ro remount
+#    mount rootfs rootfs / ro remount
 
     exec apply_disk_policy
 
@@ -268,7 +268,7 @@ on post-fs
 # We need to decide j4fs's partition number(mmcblk0pX)
     insmod /lib/modules/2.6.35.7/kernel/drivers/samsung/j4fs/j4fs.ko
     mount j4fs /dev/block/mmcblk0p1 /mnt/.lfs wait
-    
+
     insmod /lib/modules/2.6.35.7/kernel/drivers/samsung/param/param.ko
 
     insmod /lib/modules/2.6.35.7/kernel/drivers/bluetooth/bthid/bthid.ko
@@ -857,8 +857,8 @@ on property:service.brcm.bt.soft_onoff=0
 service installd /system/bin/installd
     socket installd stream 600 system system
 
-service flash_recovery /system/etc/install-recovery.sh
-    oneshot
+#service flash_recovery /system/etc/install-recovery.sh
+#    oneshot
 
 service racoon /system/bin/racoon
     socket racoon stream 600 system system

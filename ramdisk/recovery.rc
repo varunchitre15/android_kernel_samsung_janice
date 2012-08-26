@@ -2,13 +2,14 @@ on early-init
     start ueventd
 
 on init
-    export PATH /sbin:/vendor/bin:/system/sbin:/system/bin:/system/xbin
-    export LD_LIBRARY_PATH /vendor/lib:/system/lib
+    export PATH /sbin
+    export LD_LIBRARY_PATH /sbin
     export ANDROID_ROOT /system
     export ANDROID_DATA /data
     export EXTERNAL_STORAGE /sdcard
+    export SECONDARY_STORAGE /emmc
 
-    symlink /system/etc /etc
+    symlink /misc /etc
 
     mkdir /sdcard
     mkdir /preload
@@ -38,13 +39,13 @@ on early-fs
 on fs
     mount tmpfs tmpfs /tmp
 
-    exec apply_disk_policy
+    #exec apply_disk_policy
 
 on post-fs
 
     #temp
-    chmod 750 /sbin/fat.format
-    mount rootfs rootfs / ro remount
+    #chmod 750 /sbin/fat.format
+    #mount rootfs rootfs / ro remount
 
     write /proc/sys/kernel/panic_on_oops 1
     write /proc/sys/kernel/hung_task_timeout_secs 0
@@ -70,7 +71,7 @@ service console /system/bin/sh
 
 service recovery /sbin/recovery
 
-service adbd /sbin/adbd recovery
+service adbd /sbin/adbd.recovery recovery
 #    disabled
 
 on property:persist.service.adb.enable=1
