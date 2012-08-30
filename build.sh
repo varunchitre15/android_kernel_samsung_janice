@@ -22,11 +22,8 @@ case "$1" in
 		echo -e "\n\n Configuring I9070 Kernel...\n\n"
 		make u8500_rev00_janice_open_defconfig ARCH=arm CROSS_COMPILE=$TOOLCHAIN
 
-		echo -e "\n\n Compiling I9070 Kernel... \n\n"
+		echo -e "\n\n Compiling I9070 Kernel and Modules... \n\n"
 		make -j4 ARCH=arm CROSS_COMPILE=$TOOLCHAIN CONFIG_INITRAMFS_SOURCE=$INITRAMFSDIR
-
-		echo -e "\n\n Compiling I9070 Modules...\n\n"
-		make -j4 ARCH=arm CROSS_COMPILE=$TOOLCHAIN CONFIG_INITRAMFS_SOURCE=$INITRAMFSDIR modules
 
 		echo -e "\n\n Copying Modules to InitRamFS Folder...\n\n"
 		mkdir -p $INITRAMFSDIR/lib/modules/2.6.35.7
@@ -44,7 +41,7 @@ case "$1" in
 		cp drivers/scsi/scsi_wait_scan.ko $INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/scsi/scsi_wait_scan.ko
 
 		echo -e "\n\n Creating zImage...\n\n"
-		make -j4 ARCH=arm CROSS_COMPILE=$TOOLCHAIN CONFIG_INITRAMFS_SOURCE=$INITRAMFSDIR zImage
+		make ARCH=arm CROSS_COMPILE=$TOOLCHAIN CONFIG_INITRAMFS_SOURCE=$INITRAMFSDIR zImage
 
 		mkdir -p ${OUTDIR}
 		cp arch/arm/boot/zImage ${OUTDIR}/kernel.bin
