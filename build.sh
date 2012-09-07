@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASEDIR="/home/diego/AndroidDEV/android_kernel_samsung_janice"
+BASEDIR="/home/diego/AndroidDEV/i9070_kernel"
 OUTDIR="$BASEDIR/out"
 INITRAMFSDIR="$BASEDIR/ramdisk"
 TOOLCHAIN="/home/diego/AndroidDEV/toolchains/arm-eabi-4.4.3/bin/arm-eabi-"
@@ -56,9 +56,9 @@ case "$1" in
 		pushd ${OUTDIR}
 		md5sum -t kernel.bin >> kernel.bin
 		mv kernel.bin kernel.bin.md5
-		tar cf GT-I9070_GB_KERNEL.tar kernel.bin.md5
-		md5sum -t GT-I9070_GB_KERNEL.tar >> GT-I9070_GB_KERNEL.tar
-		mv GT-I9070_GB_KERNEL.tar GT-I9070_GB_KERNEL.tar.md5
+		tar cf GT-I9070-TWRP-Kernel.tar kernel.bin.md5
+		md5sum -t GT-I9070-TWRP-Kernel.tar >> GT-I9070-TWRP-Kernel.tar
+		mv GT-I9070-TWRP-Kernel.tar GT-I9070-TWRP-Kernel.tar.md5
 		popd
 
                 ENDTIME=$SECONDS
