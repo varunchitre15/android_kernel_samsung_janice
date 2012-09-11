@@ -6,8 +6,8 @@ on init
     export LD_LIBRARY_PATH /sbin
     export ANDROID_ROOT /system
     export ANDROID_DATA /data
-    export EXTERNAL_STORAGE /sdcard
-    export SECONDARY_STORAGE /emmc
+    export EXTERNAL_STORAGE /emmc
+    export EXTERNAL_STORAGE2 /sdcard
 
     symlink /misc /etc
 
@@ -71,12 +71,12 @@ service console /system/bin/sh
 
 service recovery /sbin/recovery
 
-service adbd /sbin/adbd.recovery recovery
+service adbd /sbin/adbd recovery
 #    disabled
 
 on property:persist.service.adb.enable=1
     start adbd
 
-#on property:persist.service.adb.enable=0
-#    stop adbd
+on property:persist.service.adb.enable=0
+    stop adbd
 
