@@ -1,4 +1,5 @@
-Kernel Source for Samsung Galaxy S Advance (GT-I9070)
+This is DroidAdvance+ Kernel Source repository for Samsung Galaxy S Advance (GT-I9070)
+DroidAdvance+ is Team Project for Kernel development for GT-I9070
 =============================
 
  Compiling the source:
