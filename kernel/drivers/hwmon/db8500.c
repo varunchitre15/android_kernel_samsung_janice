@@ -339,36 +339,6 @@ static int __devinit db8500_temp_probe(struct platform_device *pdev)
 	if (!data)
 		return -ENOMEM;
 
-	data->hwmon_dev = hwmon_device_register(&pdev->dev);
-	if (IS_ERR(data->hwmon_dev)) {
-		err = PTR_ERR(data->hwmon_dev);
-		dev_err(&pdev->dev, "Class registration failed (%d)\n", err);
-		goto exit;
-	}
-
-	for (i = 0; i < NUM_SENSORS; i++) {
-		data->min[i] = 0;
-		data->max[i] = 0xFF;
-		data->crit[i] = 0xFF;
-		data->min_alarm[i] = 0;
-		data->max_alarm[i] = 0;
-	}
-
-	mutex_init(&data->lock);
-	INIT_DELAYED_WORK(&data->power_off_work, thermal_power_off);
-
-	data->pdev = pdev;
-	data->power_off_delay = DEFAULT_POWER_OFF_DELAY;
-	data->measure_time = DEFAULT_MEASURE_TIME;
-
-	platform_set_drvdata(pdev, data);
-
-	err = sysfs_create_group(&pdev->dev.kobj, &db8500_temp_group);
-	if (err < 0) {
-		dev_err(&pdev->dev, "Create sysfs group failed (%d)\n", err);
-		goto exit_platform_data;
-	}
-
 	irq = platform_get_irq_byname(pdev, "IRQ_HOTMON_LOW");
 	if (irq < 0) {
 		dev_err(&pdev->dev, "Get IRQ_HOTMON_LOW failed\n");
@@ -397,6 +367,36 @@ static int __devinit db8500_temp_probe(struct platform_device *pdev)
 		goto exit;
 	} else {
 		dev_dbg(&pdev->dev, "db8500: Succeed allocate HOTMON_HIGH.\n");
+	}
+
+	data->hwmon_dev = hwmon_device_register(&pdev->dev);
+	if (IS_ERR(data->hwmon_dev)) {
+		err = PTR_ERR(data->hwmon_dev);
+		dev_err(&pdev->dev, "Class registration failed (%d)\n", err);
+		goto exit;
+	}
+
+	for (i = 0; i < NUM_SENSORS; i++) {
+		data->min[i] = 0;
+		data->max[i] = 0xFF;
+		data->crit[i] = 0xFF;
+		data->min_alarm[i] = 0;
+		data->max_alarm[i] = 0;
+	}
+
+	mutex_init(&data->lock);
+	INIT_DELAYED_WORK(&data->power_off_work, thermal_power_off);
+
+	data->pdev = pdev;
+	data->power_off_delay = DEFAULT_POWER_OFF_DELAY;
+	data->measure_time = DEFAULT_MEASURE_TIME;
+
+	platform_set_drvdata(pdev, data);
+
+	err = sysfs_create_group(&pdev->dev.kobj, &db8500_temp_group);
+	if (err < 0) {
+		dev_err(&pdev->dev, "Create sysfs group failed (%d)\n", err);
+		goto exit_platform_data;
 	}
 
 	return 0;

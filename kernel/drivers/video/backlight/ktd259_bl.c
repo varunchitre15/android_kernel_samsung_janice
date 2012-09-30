@@ -25,7 +25,6 @@
 #include <linux/init.h>
 #include <linux/platform_device.h>
 #include <linux/mutex.h>
-#include <linux/spinlock.h>
 #include <linux/fb.h>
 #include <linux/backlight.h>
 #include <linux/delay.h>
@@ -34,10 +33,8 @@
 #include <video/ktd259x_bl.h>
 
 struct ktd259 {
-	unsigned int	currentRatio;
-	unsigned int	brightness;
-	struct mutex	dev_lock;
-	spinlock_t	spin_lock;
+	unsigned int currentRatio;
+	unsigned int brightness;
 	const struct ktd259x_bl_platform_data *pd;
 };
 
@@ -53,8 +50,7 @@ static int ktd259_set_brightness(struct backlight_device *bd)
 	unsigned long irqFlags;
 
 	dev_dbg(&bd->dev, "%s fuction enter\n", __func__);
-
-	mutex_lock(&pKtd259Data->dev_lock);
+	local_irq_save(irqFlags);
 
 	if ((bd->props.power != FB_BLANK_UNBLANK) ||
 		(bd->props.fb_blank != FB_BLANK_UNBLANK)) {
@@ -70,7 +66,7 @@ static int ktd259_set_brightness(struct backlight_device *bd)
 			break;
 	}
 
-	pr_info("brightness = %d, current ratio = %d\n", reqBrightness, newCurrentRatio);
+	dev_dbg(&bd->dev, "%s: brightness = %d, current ratio = %d\n", __func__, reqBrightness, newCurrentRatio);
 
 	if (newCurrentRatio > KTD259_MAX_CURRENT_RATIO) {
 		dev_warn(&bd->dev, "%s: new current ratio (%d) exceeds max (%d)\n",
@@ -107,7 +103,6 @@ static int ktd259_set_brightness(struct backlight_device *bd)
 			during which interrupts are disabled will not result
 			in interrupts being lost.
 			*/
-			spin_lock_irqsave(&pKtd259Data->spin_lock, irqFlags);
 
 			while (currentRatio != newCurrentRatio) {
 				gpio_set_value(pd->ctrl_gpio, pd->ctrl_low);
@@ -126,7 +121,6 @@ static int ktd259_set_brightness(struct backlight_device *bd)
 				step_count++;
 			}
 
-			spin_unlock_irqrestore(&pKtd259Data->spin_lock, irqFlags);
 
 			dev_dbg(&bd->dev, "%s: stepped current by %d\n", __func__, step_count);
 
@@ -135,7 +129,7 @@ static int ktd259_set_brightness(struct backlight_device *bd)
 		pKtd259Data->currentRatio = newCurrentRatio;
 		pKtd259Data->brightness   = reqBrightness;
 	}
-	mutex_unlock(&pKtd259Data->dev_lock);
+	local_irq_restore(irqFlags);
 	dev_dbg(&bd->dev, "%s fuction exit\n", __func__);
 
 	return 0;
@@ -167,12 +161,7 @@ static int ktd259_probe(struct platform_device *pdev)
 	dev_dbg(&pdev->dev, "%s fuction enter\n", __func__);
 
 	pKtd259Data = kmalloc(sizeof(struct ktd259), GFP_KERNEL);
-
 	memset(pKtd259Data, 0, sizeof(struct ktd259));
-
-	mutex_init(&pKtd259Data->dev_lock);
-	spin_lock_init(&pKtd259Data->spin_lock);
-
 	pKtd259Data->currentRatio = KTD259_BACKLIGHT_OFF;
 	pKtd259Data->brightness = KTD259_BACKLIGHT_OFF;
 	pKtd259Data->pd = pdev->dev.platform_data;

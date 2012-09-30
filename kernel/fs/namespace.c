@@ -1606,10 +1606,9 @@ static int do_move_mount(struct path *path, char *old_name)
 	       follow_down(path))
 		;
 	err = -EINVAL;
-	if (!check_mnt(path->mnt) || !check_mnt(old_path.mnt)) {
-		printk("%s %d: %s\n", __FUNCTION__, __LINE__, current->comm);
+	if (!check_mnt(path->mnt) || !check_mnt(old_path.mnt))
 		goto out;
-	}
+
 	err = -ENOENT;
 	mutex_lock(&path->dentry->d_inode->i_mutex);
 	if (cant_mount(path->dentry))
@@ -1619,38 +1618,28 @@ static int do_move_mount(struct path *path, char *old_name)
 		goto out1;
 
 	err = -EINVAL;
-	if (old_path.dentry != old_path.mnt->mnt_root) {
-		printk("%s %d: %s\n", __FUNCTION__, __LINE__, current->comm);
+	if (old_path.dentry != old_path.mnt->mnt_root)
 		goto out1;
-	}
 
-	if (old_path.mnt == old_path.mnt->mnt_parent) {
-		printk("%s %d: %s\n", __FUNCTION__, __LINE__, current->comm);
+	if (old_path.mnt == old_path.mnt->mnt_parent)
 		goto out1;
-	}
 
 	if (S_ISDIR(path->dentry->d_inode->i_mode) !=
-	      S_ISDIR(old_path.dentry->d_inode->i_mode)) {
-		printk("%s %d: %s\n", __FUNCTION__, __LINE__ , current->comm);
+	      S_ISDIR(old_path.dentry->d_inode->i_mode))
 		goto out1;
-	}
 	/*
 	 * Don't move a mount residing in a shared parent.
 	 */
 	if (old_path.mnt->mnt_parent &&
-	    IS_MNT_SHARED(old_path.mnt->mnt_parent)) {
-		printk("%s %d: %s\n", __FUNCTION__, __LINE__, current->comm);
+	    IS_MNT_SHARED(old_path.mnt->mnt_parent))
 		goto out1;
-	}
 	/*
 	 * Don't move a mount tree containing unbindable mounts to a destination
 	 * mount which is shared.
 	 */
 	if (IS_MNT_SHARED(path->mnt) &&
-	    tree_contains_unbindable(old_path.mnt)) {
-		printk("%s %d: %s\n", __FUNCTION__, __LINE__, current->comm);
+	    tree_contains_unbindable(old_path.mnt))
 		goto out1;
-	}
 	err = -ELOOP;
 	for (p = path->mnt; p->mnt_parent != p; p = p->mnt_parent)
 		if (p == old_path.mnt)

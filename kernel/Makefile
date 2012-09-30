@@ -193,7 +193,7 @@ export KBUILD_BUILDHOST := $(SUBARCH)
 #CROSS_COMPILE	?= $(CONFIG_CROSS_COMPILE:"%"=%)
 ARCH		?= arm
 #CROSS_COMPILE	= ../prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-
-#CROSS_COMPILE	= /opt/toolchains/arm-2009q3/bin/arm-none-linux-gnueabi-
+CROSS_COMPILE	= /opt/toolchains/arm-2009q3/bin/arm-none-linux-gnueabi-
 
 # Architecture as present in compile.h
 UTS_MACHINE 	:= $(ARCH)
@@ -358,16 +358,6 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Wno-format-security \
 		   -fno-delete-null-pointer-checks
 KBUILD_AFLAGS   := -D__ASSEMBLY__
-
-#[ latin_scm 2011.08.18 Set up kernel feature for Latin
-ifeq ($(LTN_BUILD_LOCALE),LTN)
-
-# Latin Common about all project
-KBUILD_CFLAGS += -DCONFIG_LTN_COMMON
-KBUILD_CPPFLAGS += -DCONFIG_LTN_COMMON
-
-endif
-#] latin_scm 2011.08.18 Set up kernel feature for Latin
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
 KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)

@@ -27,7 +27,6 @@ enum {
 enum {
 	PRJ_OFF = 0,
 	PRJ_ON_RGB_LCD,
-	PRJ_ON_INTERNAL,
 	RGB_LED_OFF,
 	PRJ_MAX_STATE
 };
@@ -41,9 +40,7 @@ enum {
 	GREEN,
 	BLUE,
 	BEAUTY,
-	STRIPE,
-	CURTAIN_ON = 10,
-	CURTAIN_OFF
+	STRIPE
 };
 
 enum {

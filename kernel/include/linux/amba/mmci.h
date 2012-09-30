@@ -83,7 +83,6 @@ struct mmci_platform_data {
 	bool card_sleep_on_suspend;
 	void (*wakeup_handler)(struct mmc_host *host, bool wakeup);
 	bool	cd_invert;
-	bool	signal_dir;
 	int	sigdir;
 	unsigned long capabilities;
 	mmc_pm_flag_t pm_flags;
