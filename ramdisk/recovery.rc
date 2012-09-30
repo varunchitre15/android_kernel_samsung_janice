@@ -2,8 +2,8 @@ on early-init
     start ueventd
 
 on init
-    export PATH /sbin
-    export LD_LIBRARY_PATH /sbin
+    export PATH /sbin:/vendor/bin:/system/sbin:/system/bin:/system/xbin
+    export LD_LIBRARY_PATH .:/sbin:/vendor/lib:/system/lib
     export ANDROID_ROOT /system
     export ANDROID_DATA /data
     export EXTERNAL_STORAGE /emmc
@@ -11,6 +11,7 @@ on init
 
     symlink /misc /etc
 
+    mkdir /emmc
     mkdir /sdcard
     mkdir /preload
     mkdir /system
@@ -31,7 +32,7 @@ on early-fs
     # parameter block
     mkdir /mnt/.lfs 0755 root root
     insmod /lib/modules/2.6.35.7/kernel/drivers/samsung/j4fs/j4fs.ko
-    mount j4fs /dev/block/mmcblk0p1 /mnt/.lfs
+    mount j4fs /dev/block/mmcblk0p1 /mnt/.lfs wait
     insmod /lib/modules/2.6.35.7/kernel/drivers/samsung/param/param.ko
 
 
@@ -39,7 +40,7 @@ on early-fs
 on fs
     mount tmpfs tmpfs /tmp
 
-    #exec apply_disk_policy
+    exec apply_disk_policy
 
 on post-fs
 
@@ -72,7 +73,7 @@ service console /system/bin/sh
 service recovery /sbin/recovery
 
 service adbd /sbin/adbd recovery
-#    disabled
+    disabled
 
 on property:persist.service.adb.enable=1
     start adbd

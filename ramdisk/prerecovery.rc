@@ -35,7 +35,7 @@ on early-fs
     # parameter block
     mkdir /mnt/.lfs 0755 root root
     insmod /lib/modules/2.6.35.7/kernel/drivers/samsung/j4fs/j4fs.ko
-    mount j4fs /dev/block/mmcblk0p1 /mnt/.lfs
+    mount j4fs /dev/block/mmcblk0p1 /mnt/.lfs wait
     insmod /lib/modules/2.6.35.7/kernel/drivers/samsung/param/param.ko
 
 on fs
@@ -44,15 +44,15 @@ on fs
     # Start CSPSA before synchronously running the factory reset utility that
     # checks the factory reset triggers in sysfs and CSPSA and then formats
     # the block device belonging to /data.
-    #start cspsa
-    #exec /system/bin/logwrapper /system/bin/factoryreset -f /sys/socinfo/reset_reason -r factory-reset -c CSPSA0 -p 0xfffffffc:31 /dev/block/mmcblk0p4
+    start cspsa
+    exec /system/bin/logwrapper /system/bin/factoryreset -f /sys/socinfo/reset_reason -r factory-reset -c CSPSA0 -p 0xfffffffc:31 /dev/block/mmcblk0p4
 
     # Once any factory reset is completed (this is why exec is used above) it is
     # OK to mount the remaining file system volumes.
 
-    mount ext4 /dev/block/mmcblk0p2 /modemfs nosuid nodev wait
-    mount ext4 /dev/block/mmcblk0p5 /data nosuid nodev noauto_da_alloc wait
-    mount ext4 /dev/block/mmcblk0p7 /efs nosuid nodev noatime wait
+    mount ext4 /dev/block/mmcblk0p2 /modemfs wait noatime nosuid nodev
+    mount ext4 /dev/block/mmcblk0p5 /data wait noatime nosuid nodev noauto_da_alloc
+    mount ext4 /dev/block/mmcblk0p7 /efs wait noatime nosuid nodev
 
     chmod 0666 /dev/log/radio
     chmod 0666 /dev/log/main
@@ -104,10 +104,10 @@ service console /system/bin/sh
 # Crash Safe Parameter Storage Area, serving production parameter requests from clients.
 # Configuration is read from file "/etc/cspsa.conf" and each found area spawns a CSPSA server
 # process.
-#service cspsa /system/bin/logwrapper /system/bin/cspsa-server
-#    class parameter_storage
-#    user root
-#    oneshot
+service cspsa /system/bin/logwrapper /system/bin/cspsa-server
+    class parameter_storage
+    user root
+    oneshot
 
 #STE: Copy RF trim data from CSPSA, and start the Modem Stroage Agent (MSA) service
 service modem /system/bin/sh /system/etc/ste_modem.sh

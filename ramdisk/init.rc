@@ -125,7 +125,7 @@ setrlimit 4 -1 -1
 on fs
 # mount mtd partitions
     # Mount /system rw first to give the filesystem a chance to save a checkpoint
-    mount ext4 /dev/block/mmcblk0p3 /system rw
+    mount ext4 /dev/block/mmcblk0p3 /system wait rw
 
     # Start CSPSA before synchronously running the factory reset utility that
     # checks the factory reset triggers in sysfs and CSPSA and then formats
@@ -136,24 +136,24 @@ on fs
     # Once any factory reset is completed (this is why exec is used above) it is
     # OK to mount the remaining file system volumes.
 
-    mount ext4 /dev/block/mmcblk0p2 /modemfs nosuid nodev
-## for ODE
-#    mount ext4 /dev/block/mmcblk0p5 /data nosuid nodev nodelalloc,noauto_da_alloc
-    mount ext4 /dev/block/mmcblk0p4 /cache nosuid nodev
-    mount ext4 /dev/block/mmcblk0p7 /efs nosuid nodev noatime
+    wait /dev/block/mmcblk0p2
+    exec /system/bin/e2fsck -y /dev/block/mmcblk0p2
+    mount ext4 /dev/block/mmcblk0p2 /modemfs noatime nosuid nodev
+    wait /dev/block/mmcblk0p4
+    exec /system/bin/e2fsck -y /dev/block/mmcblk0p4
+    mount ext4 /dev/block/mmcblk0p4 /cache noatime nosuid nodev
+    wait /dev/block/mmcblk0p7
+    exec /system/bin/e2fsck -y /dev/block/mmcblk0p7
+    mount ext4 /dev/block/mmcblk0p7 /efs noatime nosuid nodev
 
 ## for ODE
     wait /dev/block/mmcblk0p5
     exec apply_sec_devenc_init
     exec check_filesystem /dev/block/mmcblk0p5 ext4
-    mount ext4 /dev/block/mmcblk0p5 /data nosuid crypt nodev nodelalloc noauto_da_alloc
+    mount ext4 /dev/block/mmcblk0p5 /data noatime nosuid crypt nodev noauto_da_alloc
 
     mkdir /data/core
     write /proc/sys/kernel/core_pattern /data/core/%e.%t.%p
-
-
-    # We chown/chmod /modemfs again so because mount is run as root + defaults
-    mount ext4 /dev/block/mmcblk0p2 /modemfs nosuid nodev
 
 on post-fs
     # once everything is setup, no need to modify /
@@ -268,12 +268,10 @@ on post-fs
 # We need to decide j4fs's partition number(mmcblk0pX)
     insmod /lib/modules/2.6.35.7/kernel/drivers/samsung/j4fs/j4fs.ko
     mount j4fs /dev/block/mmcblk0p1 /mnt/.lfs wait
-
+    
     insmod /lib/modules/2.6.35.7/kernel/drivers/samsung/param/param.ko
 
     insmod /lib/modules/2.6.35.7/kernel/drivers/bluetooth/bthid/bthid.ko
-
-    insmod /lib/modules/2.6.35.7/cifs.ko
 
     # Create dump dir and collect dumps.
     # Do this before we mount cache so eventually we can use cache for
@@ -383,9 +381,13 @@ on post-fs
     mkdir /efs/.files/.dx1 0775
     mkdir /efs/.files/.dm33 0775
     mkdir /efs/.files/.mp301 0775
+
+    chown media system /efs/.files
     chown media system /efs/.files/.dx1
     chown media system /efs/.files/.dm33
     chown media system /efs/.files/.mp301
+
+    chmod 0775 /efs/.files
     chmod 0775 /efs/.files/.dx1
     chmod 0775 /efs/.files/.dm33
     chmod 0775 /efs/.files/.mp301    
@@ -490,9 +492,12 @@ on post-fs
 
 
 # for CTS - removed write permission of others
+    mkdir /data/log 0775 system log
+    mkdir /data/anr 0775 system log
     chmod 0775 /data/log
     chown system log /data/log
     chmod 0775 /data/anr
+    chown system log /data/anr
 
 # Remount /system ro to protect the filesystem
     mount ext4 /dev/block/mmcblk0p3 /system ro remount
@@ -539,6 +544,9 @@ on boot
 
 # Set timeout value for rmnet stats.
     write /sys/devices/virtual/net/rmnet0/timeout_suspend 5000000
+
+# permission for fast dormacy for RIL
+    chown radio system /sys/devices/virtual/net/svnet0/waketime
 
 # Define the oom_adj values for the classes of processes that can be
 # killed by the kernel.  These are used in ActivityManagerService.
@@ -599,6 +607,7 @@ on boot
     chown system system /sys/class/backlight/pwm-backlight/device/panel_id
     chown system system /sys/class/backlight/pwm-backlight/device/acl_set
     chown system system /sys/class/backlight/pwm-backlight/device/gamma_mode
+    chmod 664 /sys/class/backlight/pwm-backlight/device/gamma_mode
     chown system system /sys/class/backlight/pwm-backlight/device/gamma_table
     chown system system /sys/class/timed_output/vibrator/enable
     chown radio radio /sys/class/usb_switch/FSA_SWITCH/jig_smd
@@ -779,7 +788,7 @@ service mobex-daemon /system/bin/npsmobex
     group system inet
 
 service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-system-server
-    socket zygote stream 666
+    socket zygote stream 660 root system
     onrestart write /sys/android_power/request_state wake
     onrestart write /sys/power/state on
     onrestart restart media
@@ -809,18 +818,14 @@ service media /system/bin/logwrapper /system/bin/mediaserver
     ioprio rt 4
 #ioprio should be in last line.
 
-#lkj add for MTV renderer
-service mtvmfservice /system/bin/mtvmfservice
-    user system
-    group system graphics
-
 service playsound /system/bin/playsound
     user media
     group system
     disabled
     oneshot
 	
-service samsungani /sbin/bootanimation.sh
+#service bootanim /system/bin/bootanimation
+service samsungani /system/bin/samsungani
     user graphics
     group graphics
     disabled
@@ -856,8 +861,8 @@ on property:service.brcm.bt.soft_onoff=0
 service installd /system/bin/installd
     socket installd stream 600 system system
 
-#service flash_recovery /system/etc/install-recovery.sh
-#    oneshot
+service flash_recovery /system/etc/install-recovery.sh
+    oneshot
 
 service racoon /system/bin/racoon
     socket racoon stream 600 system system
@@ -998,7 +1003,7 @@ on property:encryption.bootmode=remount
     stop immvibed 
     stop zygote   
 
-    mount ext4 /dev/block/mmcblk0p5 /data nosuid usedm nodev nodelalloc noauto_da_alloc
+    mount ext4 /dev/block/mmcblk0p5 /data noatime nosuid usedm nodev noauto_da_alloc
     # We chown/chmod /data again so because mount is run as root + defaults
     chown system system /data
     chmod 0771 /data
