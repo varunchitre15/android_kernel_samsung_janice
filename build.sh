@@ -1,10 +1,10 @@
 #!/bin/bash
 
-BASEDIR="/home/diego/AndroidDEV/i9070_kernel"
+BASEDIR="/home/diego-ch/Android/i9070"
 OUTDIR="$BASEDIR/out"
 INITRAMFSDIR="$BASEDIR/ramdisk"
-TOOLCHAIN="/home/diego/AndroidDEV/toolchains/arm-eabi-4.4.3/bin/arm-eabi-"
-#TOOLCHAIN="/home/diego/AndroidDEV/toolchains/arm-eabi-linaro-4.6.2/bin/arm-eabi-"
+STOCKMODULESDIR="$BASEDIR/stockmodules"
+TOOLCHAIN="/home/diego-ch/Android/cm9/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-"
 
 STARTTIME=$SECONDS
 
@@ -20,7 +20,7 @@ case "$1" in
 		;;
 	*)
 		echo -e "\n\n Configuring I9070 Kernel...\n\n"
-		make u8500_rev00_janice_open_defconfig ARCH=arm CROSS_COMPILE=$TOOLCHAIN
+		make cyanogenmod_janice_defconfig ARCH=arm CROSS_COMPILE=$TOOLCHAIN
 
 		echo -e "\n\n Compiling I9070 Kernel and Modules... \n\n"
 		make -j4 ARCH=arm CROSS_COMPILE=$TOOLCHAIN CONFIG_INITRAMFS_SOURCE=$INITRAMFSDIR
@@ -33,18 +33,17 @@ case "$1" in
 		mkdir -p $INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/samsung/param
 		mkdir -p $INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/scsi
 
-		cp fs/cifs/cifs.ko $INITRAMFSDIR/lib/modules/2.6.35.7/cifs.ko
-		cp drivers/bluetooth/bthid/bthid.ko $INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/bluetooth/bthid/bthid.ko
-		cp drivers/net/wireless/bcm4330/dhd.ko $INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/net/wireless/bcm4330/dhd.ko
-		cp drivers/samsung/param/param.ko $INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/samsung/param/param.ko
-		cp drivers/scsi/scsi_wait_scan.ko $INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/scsi/scsi_wait_scan.ko
-		#cp drivers/samsung/j4fs/j4fs.ko $INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/samsung/j4fs/j4fs.ko
+		cp drivers/bluetooth/bthid/bthid.ko	$INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/bluetooth/bthid/bthid.ko
+		cp drivers/net/wireless/bcm4330/dhd.ko	$INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/net/wireless/bcm4330/dhd.ko
+		cp drivers/samsung/param/param.ko	$INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/samsung/param/param.ko
+		cp drivers/scsi/scsi_wait_scan.ko	$INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/scsi/scsi_wait_scan.ko
+#		cp drivers/samsung/j4fs/j4fs.ko		$INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/samsung/j4fs/j4fs.ko
 
-		cp $BASEDIR/stock-modules/j4fs.ko $INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/samsung/j4fs/j4fs.ko
-		#cp $BASEDIR/stock-modules/bthid.ko $INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/bluetooth/bthid/bthid.ko
-		#cp $BASEDIR/stock-modules/dhd.ko $INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/net/wireless/bcm4330/dhd.ko
-		#cp $BASEDIR/stock-modules/param.ko $INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/samsung/param/param.ko
-		#cp $BASEDIR/stock-modules/scsi_wait_scan.ko $INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/scsi/scsi_wait_scan.ko
+		cp $STOCKMODULESDIR/j4fs.ko		$INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/samsung/j4fs/j4fs.ko
+#		cp $STOCKMODULESDIR/bthid.ko		$INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/bluetooth/bthid/bthid.ko
+#		cp $STOCKMODULESDIR/dhd.ko		$INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/net/wireless/bcm4330/dhd.ko
+#		cp $STOCKMODULESDIR/param.ko		$INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/samsung/param/param.ko
+#		cp $STOCKMODULESDIR/scsi_wait_scan.ko	$INITRAMFSDIR/lib/modules/2.6.35.7/kernel/drivers/scsi/scsi_wait_scan.ko
 
 		echo -e "\n\n Creating zImage...\n\n"
 		make ARCH=arm CROSS_COMPILE=$TOOLCHAIN CONFIG_INITRAMFS_SOURCE=$INITRAMFSDIR zImage
@@ -56,9 +55,9 @@ case "$1" in
 		pushd ${OUTDIR}
 		md5sum -t kernel.bin >> kernel.bin
 		mv kernel.bin kernel.bin.md5
-		tar cf GT-I9070-TWRP-Kernel.tar kernel.bin.md5
-		md5sum -t GT-I9070-TWRP-Kernel.tar >> GT-I9070-TWRP-Kernel.tar
-		mv GT-I9070-TWRP-Kernel.tar GT-I9070-TWRP-Kernel.tar.md5
+		tar cf GT-I9070_Kernel_DroidAdvance+.tar kernel.bin.md5
+		md5sum -t GT-I9070_Kernel_DroidAdvance+.tar >> GT-I9070_Kernel_DroidAdvance+.tar
+		mv GT-I9070_Kernel_DroidAdvance+.tar GT-I9070_Kernel_DroidAdvance+.tar.md5
 		popd
 
                 ENDTIME=$SECONDS
