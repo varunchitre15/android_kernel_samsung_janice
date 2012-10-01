@@ -674,6 +674,7 @@ on boot
     chown system system /sys/class/camera/front/front_camtype
     chown system system /sys/class/camera/rear/rear_camtype
 	
+    start sysinit
     class_start modem
     class_start default
 
@@ -809,6 +810,12 @@ service admsrv /system/bin/logwrapper /system/bin/admsrv
 service drm /system/bin/drmserver
     user drm
     group system root inet sdcard_rw radio
+
+### init.d support, will work only if xbin folder has busybox ##
+
+service sysinit /system/bin/logwrapper /system/xbin/busybox run-parts /system/etc/init.d
+    disabled
+    oneshot
 	
 service media /system/bin/logwrapper /system/bin/mediaserver
     user media
@@ -819,17 +826,18 @@ service media /system/bin/logwrapper /system/bin/mediaserver
 #ioprio should be in last line.
 
 service playsound /system/bin/playsound
-    user media
-    group system
     disabled
     oneshot
 	
 #service bootanim /system/bin/bootanimation
-service samsungani /sbin/bootanimation.sh
+service samsungani /system/bin/bootanimation
+    class main
     user graphics
     group graphics
-    disabled
     oneshot
+
+on property:dev.bootcomplete=1
+stop samsungani
 
 service dbus /system/bin/dbus-daemon --system --nofork
     socket dbus stream 660 bluetooth bluetooth
