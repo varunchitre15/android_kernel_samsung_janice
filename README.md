@@ -1,4 +1,4 @@
-Kernel Source for Samsung Galaxy S Advance (GT-I9070)
+Kernel Source for ThunderZap(TZ) kernel included in JetMOD
 =============================
 
  Compiling the source:
